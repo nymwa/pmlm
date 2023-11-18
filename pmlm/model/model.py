@@ -27,6 +27,7 @@ class Model(nn.Module):
             Layer(d_model, d_rnn, dropout)
             for _ in range(num_layers)])
 
+        self.layernorm = nn.LayerNorm(d_model)
         self.fc = nn.Linear(d_model, d_vocab, bias = False)
 
     def forward(
@@ -52,6 +53,7 @@ class Model(nn.Module):
                     enforce_sorted = enforce_sorted)
             next_hidden_list.append(h)
 
+        x = self.layernorm(x)
         x = self.fc(x)
         return x, next_hidden_list
 

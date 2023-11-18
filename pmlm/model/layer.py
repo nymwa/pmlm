@@ -14,7 +14,7 @@ class Layer(nn.Module):
         self.fc2 = nn.Linear(d_rnn, d_model)
         self.rnn = nn.RNN(d_rnn, d_rnn, nonlinearity = nonlinearity, bidirectional = True)
         self.act = nn.ReLU()
-        self.ln = nn.LayerNorm(d_model)
+        self.layernorm = nn.LayerNorm(d_model)
         self.dropout = nn.Dropout(dropout)
 
     def forward_rnn(self, x, lengths, h, enforce_sorted):
@@ -32,8 +32,9 @@ class Layer(nn.Module):
         return x, h
 
     def forward(self, x, lengths, h = None, enforce_sorted = True):
-        z, h = self.forward_main(x, lengths, h, enforce_sorted)
+        z = self.layernorm(x)
+        z, h = self.forward_main(z, lengths, h, enforce_sorted)
         z = self.dropout(z)
-        x = self.ln(x + z)
+        x = x + z
         return x, h
 
